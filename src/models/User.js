@@ -1,5 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../db';
+import Profile from './Profile';
 
 class User extends Model {}
 
@@ -25,9 +26,13 @@ User.init(
   },
   {
     sequelize,
-    modelName: 'users',
+    tableName: 'users',
     timestamps: false,
   }
 );
+
+User.hasOne(Profile, {
+  foreignKey: 'userId',
+});
 
 export default User;
