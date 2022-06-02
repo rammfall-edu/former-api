@@ -1,43 +1,42 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../db';
-import Profile from './Profile';
-import Form from './Form';
+import User from './User';
 
-class User extends Model {}
+class Form extends Model {}
 
-User.init(
+Form.init(
   {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
-    username: {
+    title: {
       type: DataTypes.STRING,
       nullable: false,
     },
-    email: {
-      type: DataTypes.STRING,
+    isOpen: {
+      type: DataTypes.BOOLEAN,
       nullable: false,
+      default: true,
     },
-    password: {
-      type: DataTypes.STRING,
+    userId: {
+      type: DataTypes.INTEGER,
       nullable: false,
+      foreignKey: true,
     },
   },
   {
     sequelize,
-    tableName: 'users',
+    tableName: 'form',
     timestamps: false,
   }
 );
 
-User.hasOne(Profile, {
-  foreignKey: 'userId',
+Form.sync().then(() => {
+  Form.belongsTo(User, {
+    foreignKey: 'userId',
+  });
 });
 
-User.hasMany(Form, {
-  foreignKey: 'userId',
-});
-
-export default User;
+export default Form;

@@ -34,4 +34,15 @@ export const appValidations = {
     minLength: 4,
     maxLength: 50,
   },
+  formTitle: {
+    type: 'string',
+    minLength: 8,
+    maxLength: 40,
+  },
+  formIsOpen: {
+    type: 'boolean',
+  },
+  id: {
+    type: 'number',
+  },
 };

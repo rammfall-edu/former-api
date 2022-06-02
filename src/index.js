@@ -5,6 +5,7 @@ import { sign, verify } from 'jsonwebtoken';
 import User from './models/User';
 import { appValidations } from './validations';
 import Profile from './models/Profile';
+import Form from './models/Form';
 
 const SECRET_KEY = 'very secret';
 const fastify = Fastify({
@@ -235,6 +236,111 @@ fastify.register((instance, {}, done) => {
         .send({ info: 'Password not compared', name: 'password' });
     }
   );
+
+  instance.put(
+    '/account/email',
+    {
+      schema: {
+        body: {
+          type: 'object',
+          properties: {
+            email: appValidations.email,
+          },
+          required: ['email'],
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.user;
+      const { email } = request.body;
+      const user = await User.findOne({ where: { id } });
+      if (await User.findOne({ where: { email } })) {
+        return reply
+          .status(403)
+          .send({ info: 'Email already exist', name: 'email' });
+      }
+
+      user.email = email;
+
+      await user.save();
+      return reply.send({ info: 'Email was successfully changed' });
+    }
+  );
+
+  instance.post(
+    '/form',
+    {
+      schema: {
+        body: {
+          type: 'object',
+          properties: {
+            isOpen: appValidations.formIsOpen,
+            title: appValidations.formTitle,
+          },
+          required: ['isOpen', 'title'],
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.user;
+      const { title, isOpen } = request.body;
+      const form = new Form({ title, isOpen, userId: id });
+      await form.save();
+
+      return reply.send({ info: 'Form created successfully' });
+    }
+  );
+
+  instance.get('/form', async (request, reply) => {
+    const { id } = request.user;
+    const forms = await Form.findAll({ where: { userId: id } });
+
+    return reply.send(forms);
+  });
+
+  instance.put(
+    '/form',
+    {
+      schema: {
+        body: {
+          type: 'object',
+          properties: {
+            isOpen: appValidations.formIsOpen,
+            title: appValidations.formTitle,
+            id: appValidations.id,
+          },
+          required: ['isOpen', 'title', 'id'],
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id: userId } = request.user;
+      const { isOpen, title, id } = request.body;
+      const form = await Form.findOne({ where: { id, userId } });
+
+      if (!form) {
+        return reply.status(403).send({ info: 'Not permitted' });
+      }
+      form.isOpen = isOpen;
+      form.title = title;
+      await form.save();
+
+      return reply.send({ info: 'Form updated successfully' });
+    }
+  );
+
+  instance.delete('/form/:id', async (request, reply) => {
+    const { id: userId } = request.user;
+    const { id } = request.params;
+    const form = await Form.findOne({ where: { id, userId } });
+
+    if (!form) {
+      return reply.status(403).send({ info: 'Not permitted' });
+    }
+    await form.destroy();
+
+    return reply.send({ info: 'Successfully deleted' });
+  });
 
   done();
 });
