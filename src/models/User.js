@@ -1,7 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../db';
-import Profile from './Profile';
-import Form from './Form';
 
 class User extends Model {}
 
@@ -31,13 +29,5 @@ User.init(
     timestamps: false,
   }
 );
-
-User.hasOne(Profile, {
-  foreignKey: 'userId',
-});
-
-User.hasMany(Form, {
-  foreignKey: 'userId',
-});
 
 export default User;

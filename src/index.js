@@ -6,6 +6,7 @@ import User from './models/User';
 import { appValidations } from './validations';
 import Profile from './models/Profile';
 import Form from './models/Form';
+import './init';
 
 const SECRET_KEY = 'very secret';
 const fastify = Fastify({

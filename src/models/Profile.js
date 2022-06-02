@@ -44,10 +44,8 @@ Profile.init(
   }
 );
 
-Profile.sync().then(() => {
-  Profile.belongsTo(User, {
-    foreignKey: 'userId',
-  });
+Profile.belongsTo(User, {
+  foreignKey: 'userId',
 });
 
 export default Profile;

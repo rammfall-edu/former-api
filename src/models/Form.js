@@ -33,10 +33,8 @@ Form.init(
   }
 );
 
-Form.sync().then(() => {
-  Form.belongsTo(User, {
-    foreignKey: 'userId',
-  });
+Form.belongsTo(User, {
+  foreignKey: 'userId',
 });
 
 export default Form;
