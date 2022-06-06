@@ -1,6 +1,7 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../db';
 import User from './User';
+import Field from './Field';
 
 class Form extends Model {}
 
@@ -35,6 +36,10 @@ Form.init(
 
 Form.belongsTo(User, {
   foreignKey: 'userId',
+});
+
+Form.hasMany(Field, {
+  foreignKey: 'formId',
 });
 
 export default Form;

@@ -7,6 +7,7 @@ import { appValidations } from './validations';
 import Profile from './models/Profile';
 import Form from './models/Form';
 import './init';
+import Field from './models/Field';
 
 const SECRET_KEY = 'very secret';
 const fastify = Fastify({
@@ -300,7 +301,7 @@ fastify.register((instance, {}, done) => {
   });
 
   instance.put(
-    '/form',
+    '/form/:id',
     {
       schema: {
         body: {
@@ -310,13 +311,23 @@ fastify.register((instance, {}, done) => {
             title: appValidations.formTitle,
             id: appValidations.id,
           },
-          required: ['isOpen', 'title', 'id'],
+          required: ['isOpen', 'title'],
+        },
+        params: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'number',
+            },
+          },
+          required: ['id'],
         },
       },
     },
     async (request, reply) => {
       const { id: userId } = request.user;
-      const { isOpen, title, id } = request.body;
+      const { isOpen, title } = request.body;
+      const { id } = request.params;
       const form = await Form.findOne({ where: { id, userId } });
 
       if (!form) {
@@ -330,18 +341,147 @@ fastify.register((instance, {}, done) => {
     }
   );
 
-  instance.delete('/form/:id', async (request, reply) => {
-    const { id: userId } = request.user;
-    const { id } = request.params;
-    const form = await Form.findOne({ where: { id, userId } });
+  instance.delete(
+    '/form/:id',
+    {
+      schema: {
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: {
+              type: 'number',
+            },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id: userId } = request.user;
+      const { id } = request.params;
+      const form = await Form.findOne({ where: { id, userId } });
 
-    if (!form) {
-      return reply.status(403).send({ info: 'Not permitted' });
+      if (!form) {
+        return reply.status(403).send({ info: 'Not permitted' });
+      }
+      await form.destroy();
+
+      return reply.send({ info: 'Successfully deleted' });
     }
-    await form.destroy();
+  );
 
-    return reply.send({ info: 'Successfully deleted' });
-  });
+  instance.get(
+    '/form/:id',
+    {
+      schema: {
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: {
+              type: 'number',
+            },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id: userId } = request.user;
+      const { id } = request.params;
+      const form = await Form.findOne({ where: { id, userId } });
+
+      if (form) {
+        return reply.send(form);
+      }
+
+      return reply.status(404).send({ info: 'Form does not exist' });
+    }
+  );
+
+  instance.post(
+    '/form/:id',
+    {
+      schema: {
+        body: {
+          type: 'object',
+          properties: {
+            fields: {
+              type: 'array',
+              minItems: 1,
+              items: {
+                type: 'object',
+                properties: {
+                  type: {
+                    type: 'string',
+                    minLength: 4,
+                    maxLength: 20,
+                    enum: ['text', 'textarea', 'select', 'radio', 'checkbox'],
+                  },
+                  name: {
+                    type: 'string',
+                    minLength: 4,
+                    maxLength: 20,
+                  },
+                  label: {
+                    type: 'string',
+                    minLength: 4,
+                    maxLength: 20,
+                  },
+                  placeholder: {
+                    type: 'string',
+                    minLength: 4,
+                    maxLength: 20,
+                  },
+                  default: {
+                    type: 'string',
+                    minLength: 4,
+                    maxLength: 20,
+                  },
+                },
+                required: ['name', 'label', 'type'],
+              },
+            },
+          },
+          required: ['fields'],
+        },
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: {
+              type: 'number',
+            },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id: userId } = request.user;
+      const { id } = request.params;
+      const form = await Form.findOne({ where: { id, userId } });
+
+      if (form) {
+        const { fields } = request.body;
+        await fields.forEach(
+          async ({ type, label, placeholder, default: defaultValue, name }) => {
+            const field = new Field({
+              type,
+              label,
+              placeholder,
+              default: defaultValue,
+              name,
+            });
+
+            await field.save();
+          }
+        );
+
+        return reply.send({});
+      }
+
+      return reply.status(404).send({ info: 'Form does not exist' });
+    }
+  );
 
   done();
 });
