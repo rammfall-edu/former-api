@@ -34,6 +34,7 @@ module.exports = {
 
     await queryInterface.addColumn('field', 'formId', {
       type: Sequelize.INTEGER,
+      allowNull: false,
       references: {
         model: 'form',
         key: 'id',
