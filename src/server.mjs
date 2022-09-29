@@ -3,7 +3,10 @@ import db from './db.mjs';
 
 (async () => {
   try {
-    await fastify.listen(process.env.PORT || 3001);
+    await fastify.listen({
+      port: process.env.PORT || 3001,
+      host: '0.0.0.0'
+    });
     await db.authenticate();
   } catch (err) {
     console.log(err);
