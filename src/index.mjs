@@ -1,14 +1,8 @@
 import Fastify from 'fastify';
-import { hash, compare } from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-const  {verify} = jwt;
 
 import User from './models/User.mjs';
-import { appValidations } from './validations/index.mjs';
-import Profile from './models/Profile.mjs';
-import Form from './models/Form.mjs';
 import './init.mjs';
-import Field from './models/Field.mjs';
 import { login, registration } from './handlers/user.mjs';
 import {
   createProfile,
@@ -27,6 +21,7 @@ import {
 import { createFields, deleteFields, getFields } from './handlers/fields.mjs';
 import { answerGetForm } from './handlers/answer.mjs';
 
+const { default: { verify } } = jwt;
 export const SECRET_KEY = 'very secret';
 const fastify = Fastify({
   logger: true,

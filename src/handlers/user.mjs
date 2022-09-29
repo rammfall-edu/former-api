@@ -4,7 +4,7 @@ import { compare, hash } from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { SECRET_KEY } from '../index.mjs';
 
-const {sign} = jwt;
+const { default: { sign } } = jwt;
 
 export const registration = {
   validationSchema: {
