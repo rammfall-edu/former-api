@@ -137,11 +137,14 @@ export const deleteFields = {
   validationSchema: {
     params: {
       type: 'object',
-      required: ['id'],
+      required: ['id', 'fieldId'],
       properties: {
         id: {
           type: 'number',
         },
+        fieldId: {
+          type: 'number',
+        }
       },
     },
   },
