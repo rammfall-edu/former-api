@@ -1,8 +1,10 @@
-import { appValidations } from '../validations';
-import User from '../models/User';
+import { appValidations } from '../validations/index.mjs';
+import User from '../models/User.mjs';
 import { compare, hash } from 'bcrypt';
-import { sign } from 'jsonwebtoken';
-import { SECRET_KEY } from '../index';
+import * as jwt from 'jsonwebtoken';
+import { SECRET_KEY } from '../index.mjs';
+
+const {sign} = jwt;
 
 export const registration = {
   validationSchema: {

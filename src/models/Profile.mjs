@@ -1,38 +1,37 @@
 import { DataTypes, Model } from 'sequelize';
-import sequelize from '../db';
+import sequelize from '../db.mjs';
+import User from './User.mjs';
 
-class Field extends Model {}
+class Profile extends Model {}
 
-Field.init(
+Profile.init(
   {
     id: {
       type: DataTypes.INTEGER,
-      autoIncrement: true,
-      nullable: false,
       primaryKey: true,
+      autoIncrement: true,
     },
-    type: {
-      type: DataTypes.ENUM('text', 'textarea', 'select', 'radio', 'checkbox'),
-      nullable: false,
-      default: 'text',
-    },
-    label: {
-      type: DataTypes.STRING,
-      nullable: false,
-    },
-    placeholder: {
+    firstName: {
       type: DataTypes.STRING,
       nullable: true,
     },
-    default: {
+    lastName: {
       type: DataTypes.STRING,
       nullable: true,
     },
-    name: {
+    phoneNumber: {
       type: DataTypes.STRING,
-      nullable: false,
+      nullable: true,
     },
-    formId: {
+    photo: {
+      type: DataTypes.STRING,
+      nullable: true,
+    },
+    dateOfBirth: {
+      type: DataTypes.DATE,
+      nullable: true,
+    },
+    userId: {
       type: DataTypes.INTEGER,
       nullable: false,
       foreignKey: true,
@@ -40,9 +39,13 @@ Field.init(
   },
   {
     sequelize,
-    tableName: 'field',
+    tableName: 'profile',
     timestamps: false,
   }
 );
 
-export default Field;
+Profile.belongsTo(User, {
+  foreignKey: 'userId',
+});
+
+export default Profile;

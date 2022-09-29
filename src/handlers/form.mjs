@@ -1,5 +1,5 @@
-import { appValidations } from '../validations';
-import Form from '../models/Form';
+import { appValidations } from '../validations/index.mjs';
+import Form from '../models/Form.mjs';
 
 export const createForm = {
   validationSchema: {
@@ -18,7 +18,7 @@ export const createForm = {
     const form = new Form({ title, isOpen, userId: id });
     await form.save();
 
-    return reply.send({ info: 'Form created successfully' });
+    return reply.send({ info: 'Form created successfully', data: form });
   },
 };
 

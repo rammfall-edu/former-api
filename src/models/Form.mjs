@@ -1,7 +1,7 @@
 import { DataTypes, Model } from 'sequelize';
-import sequelize from '../db';
-import User from './User';
-import Field from './Field';
+import sequelize from '../db.mjs';
+import User from './User.mjs';
+import Field from './Field.mjs';
 
 class Form extends Model {}
 

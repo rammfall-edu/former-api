@@ -1,5 +1,5 @@
-import Form from '../models/Form';
-import Field from '../models/Field';
+import Form from '../models/Form.mjs';
+import Field from '../models/Field.mjs';
 
 export const createFields = {
   validationSchema: {
@@ -63,16 +63,31 @@ export const createFields = {
     if (form) {
       const { fields } = JSON.parse(request.body);
       const fieldsFunctions = fields.map(
-        ({ type, label, placeholder, default: defaultValue, name }) => {
+        ({
+          type,
+          label,
+          placeholder,
+          default: defaultValue,
+          name,
+          id,
+          formId,
+        }) => {
           const promise = async () => {
-            const field = new Field({
-              type,
-              label,
-              placeholder,
-              default: defaultValue,
-              name,
-              formId: form.id,
-            });
+            let field;
+
+            if (id && formId) {
+              field = await Field.findOne({ where: { id, formId } });
+            } else {
+              field = new Field({
+                type,
+                label,
+                placeholder,
+                default: defaultValue,
+                name,
+                formId: form.id,
+              });
+            }
+
             await field.save();
 
             return field;
@@ -85,6 +100,63 @@ export const createFields = {
       const createdFields = await Promise.all(fieldsFunctions);
 
       return reply.send(createdFields);
+    }
+
+    return reply.status(404).send({ info: 'Form does not exist' });
+  },
+};
+
+export const getFields = {
+  validationSchema: {
+    params: {
+      type: 'object',
+      required: ['id'],
+      properties: {
+        id: {
+          type: 'number',
+        },
+      },
+    },
+  },
+  handler: async (request, reply) => {
+    const { id: userId } = request.user;
+    const { id } = request.params;
+    const form = await Form.findOne({ where: { id, userId } });
+
+    if (form) {
+      const fields = await Field.findAll({ where: { formId: form.id } });
+
+      return reply.send(fields ? fields : []);
+    }
+
+    return reply.status(404).send({ info: 'Form does not exist' });
+  },
+};
+
+export const deleteFields = {
+  validationSchema: {
+    params: {
+      type: 'object',
+      required: ['id'],
+      properties: {
+        id: {
+          type: 'number',
+        },
+      },
+    },
+  },
+  handler: async (request, reply) => {
+    const { id: userId } = request.user;
+    const { id, fieldId } = request.params;
+    const form = await Form.findOne({ where: { id, userId } });
+
+    if (form) {
+      const field = await Field.findOne({
+        where: { formId: form.id, id: fieldId },
+      });
+
+      await field.destroy();
+      return reply.send({ info: 'Successfully deleted' });
     }
 
     return reply.status(404).send({ info: 'Form does not exist' });

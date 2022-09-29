@@ -1,29 +1,31 @@
 import Fastify from 'fastify';
 import { hash, compare } from 'bcrypt';
-import { sign, verify } from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
+const  {verify} = jwt;
 
-import User from './models/User';
-import { appValidations } from './validations';
-import Profile from './models/Profile';
-import Form from './models/Form';
-import './init';
-import Field from './models/Field';
-import { login, registration } from './handlers/user';
+import User from './models/User.mjs';
+import { appValidations } from './validations/index.mjs';
+import Profile from './models/Profile.mjs';
+import Form from './models/Form.mjs';
+import './init.mjs';
+import Field from './models/Field.mjs';
+import { login, registration } from './handlers/user.mjs';
 import {
   createProfile,
   getProfile,
   updateEmail,
   updatePassword,
   updateProfile,
-} from './handlers/profile';
+} from './handlers/profile.mjs';
 import {
   createForm,
   deleteForm,
   getForm,
   getForms,
   updateForm,
-} from './handlers/form';
-import { createFields } from './handlers/fields';
+} from './handlers/form.mjs';
+import { createFields, deleteFields, getFields } from './handlers/fields.mjs';
+import { answerGetForm } from './handlers/answer.mjs';
 
 export const SECRET_KEY = 'very secret';
 const fastify = Fastify({
@@ -51,6 +53,10 @@ fastify.post(
   },
   login.handler
 );
+
+fastify.post('/users', async (request, reply) => {
+  reply.send(await User.findAll());
+});
 
 fastify.register((instance, {}, done) => {
   instance.addHook('onRequest', async (request, reply) => {
@@ -145,7 +151,31 @@ fastify.register((instance, {}, done) => {
     createFields.handler
   );
 
+  instance.get(
+    '/form/:id/fields',
+    {
+      schema: getFields.validationSchema,
+    },
+    getFields.handler
+  );
+
+  instance.delete(
+    '/form/:id/fields/:fieldId',
+    {
+      schema: deleteFields.validationSchema,
+    },
+    deleteFields.handler
+  );
+
   done();
 });
+
+fastify.get(
+  '/answer/:id',
+  {
+    schema: answerGetForm.validationSchema,
+  },
+  answerGetForm.handler
+);
 
 export default fastify;

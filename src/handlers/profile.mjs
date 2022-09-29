@@ -1,6 +1,6 @@
-import { appValidations } from '../validations';
-import Profile from '../models/Profile';
-import User from '../models/User';
+import { appValidations } from '../validations/index.mjs';
+import Profile from '../models/Profile.mjs';
+import User from '../models/User.mjs';
 import { compare, hash } from 'bcrypt';
 
 export const createProfile = {

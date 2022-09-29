@@ -1,9 +1,9 @@
-import fastify from './index';
-import db from './db';
+import fastify from './index.mjs';
+import db from './db.mjs';
 
 (async () => {
   try {
-    await fastify.listen(3000);
+    await fastify.listen(3001);
     await db.authenticate();
   } catch (err) {
     console.log(err);
